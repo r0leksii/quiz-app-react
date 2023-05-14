@@ -1,20 +1,20 @@
-//simple quize app with react and react hooks and react context api
 import './App.css'
-import { Quiz } from './components/Quiz'
-import { QuizeProvider } from './context/QuizContext'
+import { Provider } from 'react-redux'
+import store from './redux/store'
+import Quiz from './components/Quiz'
 
 function App() {
   return (
-    <QuizeProvider>
+    <Provider store={store}>
       <>
-        <header className="App-header">
-          <h1>Quize App</h1>
+        <header>
+          <h1>Quiz App</h1>
         </header>
         <main>
           <Quiz />
         </main>
       </>
-    </QuizeProvider>
+    </Provider>
   )
 }
 

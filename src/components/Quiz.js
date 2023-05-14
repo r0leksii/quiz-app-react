@@ -1,43 +1,38 @@
-import { useState, useContext } from 'react'
-import { QuizContext } from '../context/QuizContext'
+import { useSelector, useDispatch } from 'react-redux'
+import {
+  selectAnswer,
+  nextQuestion,
+  submitQuiz,
+  restartQuiz,
+} from '../redux/actions'
 
 export const Quiz = () => {
-  const { quizData, correctAnswers } = useContext(QuizContext)
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [userAnswers, setUserAnswers] = useState(
-    new Array(quizData.length).fill(null)
+  const dispatch = useDispatch()
+  const quizData = useSelector((state) => state.quizData)
+  const currentQuestionIndex = useSelector(
+    (state) => state.currentQuestionIndex
   )
-  const [score, setScore] = useState(null)
+  const userAnswers = useSelector((state) => state.userAnswers)
+  const score = useSelector((state) => state.score)
 
   const handleAnswerSelect = (answerIndex) => {
-    const updatedUserAnswers = [...userAnswers]
-    updatedUserAnswers[currentQuestionIndex] = answerIndex
-    setUserAnswers(updatedUserAnswers)
+    dispatch(selectAnswer(answerIndex))
   }
 
-  const handleSubmit = () => {
-    let newScore = 0
-    userAnswers.forEach((answerIndex, questionIndex) => {
-      const isCorrect = quizData[questionIndex].answers[answerIndex].isCorrect
-      if (isCorrect) {
-        newScore++
-      }
-    })
-    setScore(newScore)
+  const handleSubmitQuiz = () => {
+    dispatch(submitQuiz())
   }
 
   const handleNextQuestion = () => {
     if (currentQuestionIndex < quizData.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1)
+      dispatch(nextQuestion())
     } else {
-      handleSubmit()
+      handleSubmitQuiz()
     }
   }
 
   const handleRestart = () => {
-    setCurrentQuestionIndex(0)
-    setUserAnswers(new Array(quizData.length).fill(null))
-    setScore(null)
+    dispatch(restartQuiz())
   }
 
   return (
@@ -67,14 +62,12 @@ export const Quiz = () => {
               )
             )}
           </ul>
-          {
-            <button
-              onClick={handleNextQuestion}
-              disabled={userAnswers[currentQuestionIndex] === null}
-            >
-              Next Question
-            </button>
-          }
+          <button
+            onClick={handleNextQuestion}
+            disabled={userAnswers[currentQuestionIndex] === null}
+          >
+            Next Question
+          </button>
         </>
       ) : (
         <>
@@ -82,10 +75,22 @@ export const Quiz = () => {
             <h4>Your score: </h4>
             <div className="result-score">{score}</div>
           </div>
-          <div>{correctAnswers}</div>
+          <div>
+            {quizData.map((question) => (
+              <p key={question.id}>
+                {question.id}. {question.question}{' '}
+                <span className="text-correct-answer">
+                  Correct answer is{' '}
+                  {question.answers.find((answer) => answer.isCorrect).text}
+                </span>
+              </p>
+            ))}
+          </div>
           <button onClick={handleRestart}>Restart Quiz</button>
         </>
       )}
     </>
   )
 }
+
+export default Quiz
